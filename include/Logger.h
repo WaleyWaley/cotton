@@ -1,0 +1,59 @@
+#pragma once
+#include <iostream>
+#include <string_view>
+#include <source_location>
+#include <chrono>
+/**
+ * @brief 日志器，用于输出日志，log用于输出日事件。Logger包含日志级别，日志器名称，创建时间，以及一个LogAppender数组。
+    日志事件由 log方法输出， log方法首先判断日志级别是否达到本 Logger 的级别要求，
+    如果满足则将日志事件传递给所有LogAppender进行输出，否则丢弃该条日志
+ */
+
+class Appender;
+class LogEvent;
+class LogLevel;
+
+class Logger : public std::enable_shared_from_this<Logger>{
+public:
+    explicit Logger(std::string name = std::to_string);
+
+    void log(const LogEvent& event) const;
+    // void log(const LogEvent& event, std::error_code &ec) const;
+
+    void addAppender(std::shared_ptr<Appender> appender);
+
+    void delAppender(std::shared_ptr<Appender> appender);
+
+    void clearAppender();
+
+    std::string_view getLoggerName() const {return name_;}
+
+    void setLogLevel(LogLevel::Level level) {level_ = level;}
+
+    LogLevel::Level getLogLevel() const {return level_;}
+
+    bool isLevelEnable(LogLevel::Level level) const {return level >= level_;}
+
+private:    
+    // 没啥作用，只是日志器计数，inline来实现static的类内初始化。
+    inline static std::atomic<uint32_t> logger_count_ = 0;
+    // 日志名称
+    std::string name_;
+    // 日志级别
+    LogLevel::Level level_;
+    // Appender集合
+    std::vector<std::shared_ptr<Appender>> appenders_;
+}
+
+// 在测试时调用的就是封装好的这个log函数，Logger的log是不对外暴露的
+inline void log(const Logger& logger, LogLevel::Level loglevel, std::source_location source_info){
+    logger.log(LogEvent {
+        logger.getLoggerName(),
+        loglevel,
+        0,
+        std::this_thread::get_id(),
+        Curthr::GetName(),
+        0,
+        std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()),
+        source_info});
+}
