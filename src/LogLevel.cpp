@@ -1,6 +1,7 @@
 #include "include/LogLevel.h"
 
 
+/*===================================Level=======================================*/
 
 std::string_view LogLevel::LevelToString(LogLevel::Level level) {
     switch (level) {

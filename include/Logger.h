@@ -15,7 +15,12 @@ class LogLevel;
 
 class Logger : public std::enable_shared_from_this<Logger>{
 public:
-    explicit Logger(std::string name = std::to_string);
+
+    // 带参构造
+    explicit Logger(std::string name) : name_(std::move(name)) {}
+
+    // 无参构造，自动生成名字   
+    Logger() : name(std::to_string(auto_logger_id_.fetch_add(1))) {}        // fetch_add 是 atomic 的标准写法，等价于后置 ++
 
     void log(const LogEvent& event) const;
     // void log(const LogEvent& event, std::error_code &ec) const;
@@ -35,15 +40,16 @@ public:
     bool isLevelEnable(LogLevel::Level level) const {return level >= level_;}
 
 private:    
-    // 没啥作用，只是日志器计数，inline来实现static的类内初始化。
-    inline static std::atomic<uint32_t> logger_count_ = 0;
     // 日志名称
     std::string name_;
     // 日志级别
     LogLevel::Level level_;
     // Appender集合
     std::vector<std::shared_ptr<Appender>> appenders_;
-}
+    // 自动日志器ID, inline static 可以在类内初始化
+    inline static std::atomic<uint32_t> auto_logger_id_ = 0;
+};
+
 
 // 在测试时调用的就是封装好的这个log函数，Logger的log是不对外暴露的
 inline void log(const Logger& logger, LogLevel::Level loglevel, std::source_location source_info){
