@@ -11,7 +11,7 @@ class LogEvent;
  * - %r 该日志器创建后的累计运行毫秒数
  * - %f 文件名
  * - %l 行号
- * - %v 函数名
+ * - %v 函数名  
  * - %t 线程id
  * - %F 协程id
  * - %N 线程名称
@@ -35,4 +35,5 @@ public:
 private:
     void LogFormatter_init();
     std::string pattern_;
+    
 };

@@ -7,6 +7,8 @@
 
 class LogEvent{
 public:
+    using Sptr = std::shared_ptr<LogEvent>;
+
     LogEvent() = default;
     LogEvent(const LogEvent&) = delete;
     LogEvent(LogEvent &&) noexcept = default;
@@ -38,16 +40,24 @@ public:
 
     uint32_t getThreadId() const {return thread_id_;}
 
-
     std::string_view getThreadName() const & {return thread_name_;}
 
     std::time_t getTimestamp() const {return timestamp_;}
 
     uint32_t getFiberId() const {return co_id_;}
 
+    std::string getContent() const {return custom_msg_.str();}
+
+    std::stringstream& getSS() {return custom_msg_;}
+
     std::string getFilename() const {return source_loc.file_name();}
 
     std::string getFunctionName() const {return source_loc.function_name();}
+
+    template <typename... Args>
+    void print(std::format_string<Args...> fmt, Args&&... args){
+        custom_msg_ << std::format(fmt, std::forward<Args>(args)...);
+    }
 
 private:
     std::string logger_name_;

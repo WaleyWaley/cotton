@@ -84,8 +84,12 @@ void LogFormatter::LogFormatter_init() {
             }else{
                 // 未找到闭合的 }，视为错误
                 std::cout << "Pattern parse error: missing closing brace '}'" << std::endl;
+                parse_items.emplace_back(ParseItem{"<error_brace>",str_val,0});
+                cursor = pattern.length(); // 结束解析
             }
         }
     }
-
+    static std::map<std::string, std::function<PatternIten::Sptr(const std::string& fmt)>> s_format_items = {
+        
+    };
 }

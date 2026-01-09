@@ -1,9 +1,12 @@
-#include "include/LogEvent.h"
-#include 
+#include "logger/LogEvent.h"
+#include "logger/Logger.h"
+#include "logger/LogLevel.h"
+#include <source_location>
+#include <utility>
 
 /*===================================Event=======================================*/
 LogEvent::LogEvent(std::string logger_name,
-                    LogLevel::Level level,
+                    LogLevel level,
                     uint32_t elapse,
                     uint32_t thread_id,
                     std::string thread_name,
