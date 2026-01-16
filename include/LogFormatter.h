@@ -26,14 +26,15 @@ class LogEvent;
 
 class LogFormatter{
 public:
-    LogFormatter(std::string pattern = "%d{%Y-%m-%d %H:%M:%S} [%rms] %t%T%N%T%F%T[%p]%T[%c]%T[%f:%l]%T[%v]%T%m%n") :pattern_(move(pattern)){LogFormatter_init();}
+    explicit LogFormatter(std::string pattern = "%d{%Y-%m-%d %H:%M:%S} [%rms] %t%T%N%T%F%T[%p]%T[%c]%T[%f:%l]%T[%v]%T%m%n") :pattern_(move(pattern)){startParse_();}
 
-    std::string format(const LogEvent& event) const;
+    [[nodiscard]] auto format(const LogEvent& event) const -> std::string;
 
-    size_t format(std::ostream& os, const LogEvent& event) const;
+    auto format(std::ostream& os, const LogEvent& event) const -> size_t;
 
 private:
-    void LogFormatter_init();
+    void startParse_();
     std::string pattern_;
-    
+    std::vector<Sptr<PatternItemFacade>> pattern_items_;
+    bool error_ = false;
 };

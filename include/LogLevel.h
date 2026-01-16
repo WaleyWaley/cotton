@@ -2,22 +2,36 @@
 
 #include <string_view>
 
-class LogLevel {
-public:
-    enum Level{
-        UNKNOWN = -1,
-        ALL = 1,
-        DEBUG = 2,
-        INFO = 3,
-        TRACE = 4,
-        WARN = 5,
-        ERROR = 6,
-        FATAL = 7
-    };
-
-    std::string_view LevelToString(LogLevel::Level level);
-
-    LogLevel::Level StringToLogLevel(std::string_view str);
+enum class LogLevel
+{
+    /// 系统错误
+    SYSFATAL = 9,
+    /// 系统错误
+    SYSERR = 8,
+    /// 致命错误
+    FATAL = 7,
+    /// 错误
+    ERROR = 6,
+    /// 警告
+    WARN = 5,
+    /// 追踪
+    TRACE = 4,
+    /// 一般信息
+    INFO = 3,
+    DEBUG = 2,
+    // 未设置
+    ALL = 1,
+    UNKNOW = -1
 };
+
+auto LevelToString(LogLevel level) -> std::string_view;
+
+auto StringToLogLevel(std::string_view str) -> LogLevel;
+
+auto operator<=(LogLevel lhs, LogLevel rhs) -> bool;
+auto operator>=(LogLevel lhs, LogLevel rhs) -> bool;
+auto operator<(LogLevel lhs, LogLevel rhs) -> bool;
+auto operator>(LogLevel lhs, LogLevel rhs) -> bool;
+auto operator==(LogLevel lhs, LogLevel rhs) -> bool;
 
 

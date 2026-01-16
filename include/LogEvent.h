@@ -42,8 +42,8 @@ public:
 
     std::string_view getThreadName() const & {return thread_name_;}
 
-    std::time_t getTimestamp() const {return timestamp_;}
-
+    std::time_t getTime() const {return timestamp_;}
+    
     uint32_t getFiberId() const {return co_id_;}
 
     std::string getContent() const {return custom_msg_.str();}

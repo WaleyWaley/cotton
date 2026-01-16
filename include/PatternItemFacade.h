@@ -17,7 +17,7 @@ public:
     PatternItemFacade(const PatternItemFacade&) = default;
     PatternItemFacade(PatternItemFacade&&) = default;
 
-    vitual auto format(std:;ostream& os, const LogEvent& event) -> size_t = 0;
+    vitual auto format(std::ostream& os, const LogEvent& event) -> size_t = 0;
 
     virtual ~PatternItemFacade() = default;
 };
