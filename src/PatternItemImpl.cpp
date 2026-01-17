@@ -12,10 +12,11 @@
 /* ======================================FormatterItem==============================*/
 class FunctionNameFormatItem {
 public:
-    static auto format(std::ostream&os, const LogEvent& event) -> size_t {
-        const auto& content = event.getFunctionName();
-        os << content;
-        return content.size();
+    static auto format(std::ostream&os, const LogEvent& event) -> size_t 
+    {
+        std::streampos start = os.tellp();
+        os << event.getLoggerName();
+        return static_cast<size_t>(os.tellp() - start);
     }
 };
 
@@ -27,9 +28,9 @@ class MessageFormatItem{
 public:
     static auto format(std::ostream& os, const LogEvent& event) -> size_t
     {
-        const auto& content = event.getContent();
-        os << content;
-        return content.size();
+        std::streampos start = os.tellp();
+        os << event.getLoggerName();
+        return static_cast<size_t>(os.tellp() - start);
     }
 };
 
@@ -37,9 +38,9 @@ public:
 class LevelFormatItem{
 public:
     static auto format(std::ostream& os, const LogEvent& event) -> size_t {
-        auto sv = LevelToString(event.getLevel());
-        os << sv;
-        return sv.size();
+        std::streampos start = os.tellp();
+        os << LevelToString(event.getLevel());
+        return static_cast<size_t>(os.tellp() - start);
     }
 };
 
@@ -47,10 +48,9 @@ public:
 class ElapseFormatItem{
 public:
     static auto format(std::ostream& os, const LogEvent& event) -> size_t {
-        auto elapse = event.getElapse();
-        auto str = std::to_string(elapse);
-        os << str;
-        return str.size();
+        std::streampos start = os.tellp();
+        os << std::to_string(event.getElapse());
+        return cast_static<size_t>(os.tellp() - start);
     }
 };
 
@@ -235,3 +235,21 @@ auto RegisterItemFactoryFunc() -> std::unordered_map<std::string, ItemFactoryFun
     };
     return func_map;
 }
+
+using StatusItemFactoryFunc = std::function<Sptr<PatternItemFacade>(std::string)>;
+
+auto RegisterStatusItemFactoryFunc() -> std::unordered_map<std::string, StatusItemFactoryFunc>{
+    return std::unordered_map<std::string, StatusItemFactoryFunc>{
+#define XX(str, ItemType) \
+        { \
+            #str, [](std::string sub_pattern) -> Sptr<PatternItemFacade>{ \
+                // std::make_shared<...>(...)在堆内存（Heap）里分配一块空间，创建这个对象。返回一个智能指针。
+                return std::static_pointer_cast<PatternItemFacade>(std::make_shared<PatternItemProxy<ItemType>>(sub_pattern)); \
+            } \
+        }
+            XX(d, DateTimeFormatItem),
+            XX(str, StringFormatItem)
+#undef XX
+    };
+}
+
