@@ -89,11 +89,14 @@ public:
         }
     }
 
-    // 启动日志线程
+    // 启动日志线程 -------> 主进程(老板)
     auto start() -> void
     {
+        // 设定门栓，计数为1
         running_ = true;
+        // 启动子进程(员工), 让他去干活
         thread_ = std::thread(&AsyncLogger::threadFunc_, this);
+        // 老板卡在这里！ 死等！ 只要员工没有说“我好了！”, 老板决不让start()函数返回
         latch_.wait();
     }
 
@@ -109,24 +112,28 @@ public:
     }
         
 private:
-    // 后台日志线程执行的函数(消费者)
+    // 后台日志线程执行的函数(消费者) ----------> 子进程(员工)
     auto threadFunc_() -> void
     {
+        // 员工喊我好了！，计数器从1变成0，主进程的wait() 瞬间苏醒并返回
         latch_.count_down();
         // 预分配用于交换的缓冲区，避免在日志线程中频繁分配内存
         auto new_buffer1 = std::make_unique<EventBuffer>();
         auto new_buffer2 = std::make_unique<EventBuffer>();
+
         // 用于处理待写入的缓冲区
         auto buffers_to_process = std::vector<EventBufferPtr>{};
+
         buffers_to_process.reserve(16); // 存放16个缓冲区
 
+        // 员工死循环开始循环写日志
         while(running_)
         {
             {  
                 // 等待条件变量唤醒或者超时
                 auto lock = std::unique_lock<std::mutex>(mutex_);
 
-                // 等待: 知道超时 (flush_interval_) 或被通知有数据
+                // 等待: 直到超时 (flush_interval_) 或被通知有数据
                 if(buffers_to_write_.empty())
                 {
                     cond_.wait_for(lock, std::chrono::seconds(flush_interval_));
@@ -134,8 +141,10 @@ private:
 
                 // 1. 将 current_buffer_ 移入待处理列表 (即使未满，也到时间刷新了)
                 buffers_to_write_.push_back(std::move(current_buffer_));
+
                 // 2. 将新分配的 new_buffer1 替换为新的 current_buffer_
                 current_buffer_ = std::move(new_buffer1);
+
                 // 3. 交换待写入列表：将应用线程的数据移交给日志线程
                 buffers_to_process.swap(buffers_to_write_);
                 // 此时，应用线程可以继续向 buffers_to_write_ 写入，互不影响
@@ -158,11 +167,16 @@ private:
                 };
                 auto time_point_str = std::format("{:%Y-%m-%d-%H-%M-%S}", zoned_time.get_local_time());
                 std::println("Dropper log messages at {}, {} larger than buffer", time_point_str, buffers_to_process.size()-2);
+
                 // 直接丢掉多余的日志
                 buffers_to_process.erase(buffers_to_process.begin()+2,buffers_to_process.end());
             }
             // 5. 将所有缓冲区内容写入文件
-            
+            for(const auto& buf : buffers_to_process)
+            {
+                auto data = buf->getEventSpan();
+                std::ranges::for_each(data, [this](const LogEvent& event){ this->log(event);});
+            }
         }
     }
 
