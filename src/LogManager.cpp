@@ -1,9 +1,6 @@
-#include "common/alias.h"
-#include "common/singleton.hpp"
-#include "common/util.h"
-
-#include <functional>
+#include <memory>
 #include <mutex>
-#include <string_view>
-#include <unordered_map>
 
+#include "logger/Logger.h"
+#include "logger/LogAppender.h"
+#include "logger/LoggerManager.h"

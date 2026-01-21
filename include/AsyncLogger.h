@@ -117,6 +117,7 @@ private:
     {
         // 员工喊我好了！，计数器从1变成0，主进程的wait() 瞬间苏醒并返回
         latch_.count_down();
+
         // 预分配用于交换的缓冲区，避免在日志线程中频繁分配内存
         auto new_buffer1 = std::make_unique<EventBuffer>();
         auto new_buffer2 = std::make_unique<EventBuffer>();
@@ -175,8 +176,33 @@ private:
             for(const auto& buf : buffers_to_process)
             {
                 auto data = buf->getEventSpan();
+                // this 捕获的是这个AsncLogger的类，使其能调用自己的log函数
                 std::ranges::for_each(data, [this](const LogEvent& event){ this->log(event);});
             }
+
+            // 6. 清理并回收缓冲区
+            if (buffers_to_process.size() > 2)
+            {
+                // // 如果待处理缓冲区过多，回收多余内存，但至少保留两个空的供交换
+                buffers_to_process.resize(2);
+            }
+
+            // 7. 将两个已处理的空缓冲区放回预分配指针，供下次交换使用
+            if(new_buffer1 == nullptr)
+            {
+                new_buffer1 = std::move(buffers_to_process.back());
+                buffers_to_process.pop_back();
+            }
+
+            if(new_buffer2 == nullptr)
+            {
+                new_buffer2 = std::move(buffers_to_process.back());
+                buffers_to_process.pop_back();
+            }
+
+            // 清空待处理列表
+            buffers_to_process.clear();
+            
         }
     }
 
