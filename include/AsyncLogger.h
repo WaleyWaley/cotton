@@ -140,6 +140,13 @@ private:
                     cond_.wait_for(lock, std::chrono::seconds(flush_interval_));
                 }
 
+                // [优化] 如果是超时唤醒，且完全没有新数据，直接下一轮，省去 Swap 开销
+                if(buffers_to_write_.empty() and current_buffer_->length() == 0)
+                {
+                    continue;
+                }
+
+
                 // 1. 将 current_buffer_ 移入待处理列表 (即使未满，也到时间刷新了)
                 buffers_to_write_.push_back(std::move(current_buffer_));
 

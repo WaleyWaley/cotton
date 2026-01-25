@@ -6,7 +6,7 @@
 
 /*========================标准库别名========================*/
 template <typename T>
-using Spt = std::shared_ptr<T>;
+using Sptr = std::shared_ptr<T>;
 
 template <typename T, typename Deleter = std::default_delete<T>>
 using Uptr = std::unique_ptr<T, Deleter>;

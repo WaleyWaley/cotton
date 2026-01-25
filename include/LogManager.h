@@ -23,4 +23,9 @@ public:
 
 private:
     mutable std::mutex mtx_;
+    Sptr<Logger> root_;
+    std::unordered_map< std::string, Sptr<Logger>, UtilT::Hasher, std::equal_to<> > loggers_;
 };
+
+using LoggerMgr = Cot::Singleton<LoggerManager>;
+

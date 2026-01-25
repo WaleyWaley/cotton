@@ -1,4 +1,5 @@
 #pragma once
+#include "common/alias.h"
 #include <iostream>
 #include <string_view>
 #include <source_location>
@@ -25,9 +26,9 @@ public:
     void log(const LogEvent& event) const;
     // void log(const LogEvent& event, std::error_code &ec) const;
 
-    void addAppender(std::shared_ptr<Appender> appender);
+    void addAppender(Sptr<Appender> appender);
 
-    void delAppender(std::shared_ptr<Appender> appender);
+    void delAppender(Sptr<Appender> appender);
 
     void clearAppender();
 
@@ -45,7 +46,7 @@ private:
     // 日志级别
     LogLevel::Level level_;
     // Appender集合
-    std::vector<std::shared_ptr<Appender>> appenders_;
+    std::vector<Sptr<Appender>> appenders_;
     // 自动日志器ID, inline static 可以在类内初始化
     inline static std::atomic<uint32_t> auto_logger_id_ = 0;
 };
