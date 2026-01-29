@@ -2,7 +2,7 @@
 #include "LogLevel.h"
 #include <source_location>
 #include <cstdint>
-#include <stringstream>
+#include <sstream>
 
 
 class LogEvent{
