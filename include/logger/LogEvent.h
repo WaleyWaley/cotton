@@ -3,6 +3,10 @@
 #include <source_location>
 #include <cstdint>
 #include <sstream>
+#include <memory>
+#include <format>
+#include <ctime>
+
 
 
 class LogEvent{
@@ -50,9 +54,9 @@ public:
 
     std::stringstream& getSS() {return custom_msg_;}
 
-    std::string getFilename() const {return source_loc.file_name();}
+    std::string getFilename() const {return source_loc_.file_name();}
 
-    std::string getFunctionName() const {return source_loc.function_name();}
+    std::string getFunctionName() const {return source_loc_.function_name();}
 
     template <typename... Args>
     void print(std::format_string<Args...> fmt, Args&&... args){

@@ -27,15 +27,15 @@ using TimePoint = Clock::time_point;
 
 using Seconds = std::chrono::seconds;
 
-using SystemClock = std::chrono::system_clock
+using SystemClock = std::chrono::system_clock;
 
-using ZoneTime = std::chrono::zoned_time
+using ZoneTime = std::chrono::zoned_time;
 
 /* ======================== 内存大小相关字面量 ======================== */
 // 基础类型：一个不可变的封装类，包含 uint64_t 值
 // 尽管字面量操作符可以直接返回 uint64_t，但使用一个封装类可以提供更好的类型安全性
 // 并且未来可以扩展操作符重载等功能。
-class ImuutabelMemorySize{
+class ImmutabelMemorySize{
 private:
     const size_t value;
 

@@ -12,7 +12,7 @@
 
 class Appender;
 class LogEvent;
-class LogLevel;
+enum class LogLevel;
 
 class Logger : public std::enable_shared_from_this<Logger>{
 public:
@@ -21,7 +21,7 @@ public:
     explicit Logger(std::string name) : name_(std::move(name)) {}
 
     // 无参构造，自动生成名字   
-    Logger() : name(std::to_string(auto_logger_id_.fetch_add(1))) {}        // fetch_add 是 atomic 的标准写法，等价于后置 ++
+    Logger() : name_(std::to_string(auto_logger_id_.fetch_add(1))) {}        // fetch_add 是 atomic 的标准写法，等价于后置 ++
 
     void log(const LogEvent& event) const;
     // void log(const LogEvent& event, std::error_code &ec) const;
