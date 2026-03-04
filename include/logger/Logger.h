@@ -7,6 +7,8 @@
 #include <chrono>
 #include <atomic>
 #include <thread>
+#include <vector>
+#include <memory>
 
 /**
  * @brief 日志器，用于输出日志，log用于输出日事件。Logger包含日志级别，日志器名称，创建时间，以及一个LogAppender数组。
@@ -30,7 +32,7 @@ public:
     void log(const LogEvent& event) const;
     // void log(const LogEvent& event, std::error_code &ec) const;
 
-    void addAppender(Sptr<Appender> appender);
+    void addAppender(Sptr<AppenderFacade> appender);
 
     void delAppender(Sptr<Appender> appender);
 
@@ -50,7 +52,7 @@ private:
     // 日志级别
     LogLevel level_;
     // Appender集合
-    std::vector<Sptr<Appender>> appenders_;
+    std::vector<Sptr<AppenderFacade>> appenders_;
     // 自动日志器ID, inline static 可以在类内初始化
     inline static std::atomic<uint32_t> auto_logger_id_ = 0;
 };
@@ -71,7 +73,7 @@ private:
 
 inline void log(const Logger& logger, LogLevel loglevel, std::source_location source_info = std::source_location::current()){
     uint32_t tid = static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id()));
-    auto now_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto now_t = SystemClock::to_time_t(SystemClock::now());
     
     // 注意：用小括号 () 显式调用构造函数，并且强制转换 string
     LogEvent ev(
