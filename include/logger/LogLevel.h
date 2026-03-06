@@ -21,7 +21,7 @@ enum class LogLevel
     DEBUG = 2,
     // 未设置
     ALL = 1,
-    UNKNOW = -1
+    UNKNOWN = -1
 };
 
 auto LevelToString(LogLevel level) -> std::string_view;

@@ -190,17 +190,19 @@ public:
     }
 private:
     std::string str_;
-}
+};
+
 
 using ItemFactoryFunc = std::function<Sptr<PatternItemFacade>()>;
-auto RegisterItemFactoryFunc() -> std::unordered_map<std::string, ItemFactoryFunc>{
-    auto func_map = std::unordered_map<std::string, ItemFactory>{
+// 第 1 个 Map：无参工厂
+std::unordered_map<std::string, ItemFactoryFunc> RegisterItemFactoryFunc() {
+    return {
+
 #define XX(str, ItemType) \
-        { \
-            #str,[]() -> Sptr<PatternItemFacade>{return Sptr<PatternItemFacade>{new PatternItemProxy<ItemType>{}}}; \
-        }
+        {#str, []() -> Sptr<PatternItemFacade> { return std::make_shared<PatternItemProxy<ItemType>>(); }}
+        
         XX(m, MessageFormatItem),       // m:消息
-        XX(p, levelFormatItem),         // p:日志级别
+        XX(p, LevelFormatItem),         // p:日志级别
         XX(c, NameFormatItem),          // c:日志器名称
         XX(r, ElapseFormatItem),        // r:累计毫秒数
         XX(f, FilenameFormatItem),      // f:文件名
@@ -212,25 +214,37 @@ auto RegisterItemFactoryFunc() -> std::unordered_map<std::string, ItemFactoryFun
         XX(n, NewLineFormatItem),       // n:换行符
         XX(%, PercentSignFormatItem),   // %:百分号
         XX(v, FunctionNameFormatItem),  //v:函数名XX()
+        
 #undef XX
     };
+}
+
+// // 第 2 个 Map：带参工厂，传递 fmt 参数
+// using StatusItemFactoryFunc = std::function<Sptr<PatternItemFacade>(std::string)>;
+// std::unordered_map<std::string, StatusItemFactoryFunc> RegisterStatusItemFactoryFunc() {
+//     return {
+// #define XX(str, ItemType) \
+//         {#str, [](std::string fmt) -> Sptr<PatternItemFacade> { return std::make_shared<PatternItemProxy<ItemType>>(fmt); }}
+        
+//         XX(d, DateTimeFormatItem)
+//         XX(str, StringFormatItem)
+        
+// #undef XX
+//     };
+// }
+using StatusItemFactoryFunc = std::function<Sptr<PatternItemFacade>(std::string)>;
+std::unordered_map<std::string, StatusItemFactoryFunc> RegisterStatusItemFactoryFunc() {
+    std::unordered_map<std::string, StatusItemFactoryFunc> func_map;
+    
+    // d: 日期时间
+    func_map["d"] = [](std::string fmt) -> Sptr<PatternItemFacade> { 
+        return std::make_shared<PatternItemProxy<DateTimeFormatItem>>(fmt); 
+    };
+    
+    // str: 普通纯文本字符串
+    func_map["str"] = [](std::string fmt) -> Sptr<PatternItemFacade> { 
+        return std::make_shared<PatternItemProxy<StringFormatItem>>(fmt); 
+    };
+    
     return func_map;
 }
-
-using StatusItemFactoryFunc = std::function<Sptr<PatternItemFacade>(std::string)>;
-
-auto RegisterStatusItemFactoryFunc() -> std::unordered_map<std::string, StatusItemFactoryFunc>{
-    return std::unordered_map<std::string, StatusItemFactoryFunc>{
-#define XX(str, ItemType) \
-        { \
-            #str, [](std::string sub_pattern) -> Sptr<PatternItemFacade>{ \
-                // std::make_shared<...>(...)在堆内存（Heap）里分配一块空间，创建这个对象。返回一个智能指针。
-                return std::static_pointer_cast<PatternItemFacade>(std::make_shared<PatternItemProxy<ItemType>>(sub_pattern)); \
-            } \
-        }
-            XX(d, DateTimeFormatItem),
-            XX(str, StringFormatItem)
-#undef XX
-    };
-}
-

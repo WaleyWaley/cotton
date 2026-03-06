@@ -1,6 +1,6 @@
 #include "logger/Logger.h"
 #include "logger/LoggerAppender.h"
-#include
+#include "logger/AppenderFacade.h"
 
 /*============================Logger==================================*/
 // Logger::Logger(std::string name) : name_(name){}
@@ -28,7 +28,7 @@ void Logger::clearAppender(){
 void Logger::log(const LogEvent& event) const {
     if(event.getLevel() >= level_){
         for(auto appender : appenders_){
-            appender->append(event);        // 调用基类的 log 方法，实际执行的是 AppenderProxy 的 log 方法，进而调用具体的 Appender 实现的 log 方法
+            appender->log(event);        // 调用基类的 log 方法，实际执行的是 AppenderProxy 的 log 方法，进而调用具体的 Appender 实现的 log 方法
         }
     }
 }

@@ -2,14 +2,15 @@
 #include "logger/AsyncLogger.h"
 #include "logger/LoggerAppender.h"
 #include "logger/AppenderProxy.hpp"
+#include "logger/LogFormatter.h"
 #include "common/alias.h"
 #include <iostream>
 
 int main() {
     std::cout << "========== 日志系统极简测试 ==========\n";
-    
     auto sync_logger = std::make_shared<Logger>();
-    sync_logger->addAppender(std::make_shared<AppenderProxy<RollingFileAppender>>("sync_log.txt", 1_kb));
+
+    sync_logger->addAppender(std::make_shared<AppenderProxy<RollingFileAppender>>(LogFormatter{},"sync_log.txt", 1_kb));
 
     uint32_t tid = static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id()));
     auto now_t = SystemClock::to_time_t(SystemClock::now());

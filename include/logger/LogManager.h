@@ -7,11 +7,7 @@
 #include <string_view>
 #include <unordered_map>
 
-#define GET_ROOT_LOGGER() LoggerMgr::GetInstance().getRoot()
 
-#define GET_LOGGER_BY_NAME(name) LoggerMgr::GetInstance().getLogger(name)
-
-using LoggerMgr = Cot::Singleton<LoggerManager>;
 
 class Logger;
 
@@ -31,3 +27,8 @@ private:
 };
 
 
+using LoggerMgr = Cot::Singleton<LoggerManager>;
+
+#define GET_ROOT_LOGGER() LoggerMgr::GetInstance().getRoot()
+
+#define GET_LOGGER_BY_NAME(name) LoggerMgr::GetInstance().getLogger(name)

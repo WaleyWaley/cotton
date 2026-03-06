@@ -22,6 +22,8 @@ auto LevelToString(LogLevel level) -> std::string_view
         XX(LogLevel::DEBUG, DEBUG)
         XX(LogLevel::ALL, ALL)
 #undef XX
+    default:
+        return "UNKNOWN";
     }
 }
 

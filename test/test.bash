@@ -7,5 +7,6 @@
 # 4. -I..                 : 让编译器能找到 "common/alias.h" (关键修复！)
 # 5. -std=c++23 -lpthread : 标准库和线程库支持
 
-g++ testlogger.cpp ../src/*.cpp -I../include -I.. -std=c++23 -lpthread -o testlogger && ./testlogger
-./run testlogger
+# g++ testlogger.cpp ../src/*.cpp -I../include -I.. -std=c++23 -lpthread -o testlogger && ./testlogger
+g++ testAsyncLogger.cpp ../src/*.cpp -I../include -I.. -std=c++23 -lpthread -o testAsyncLogger && ./testAsyncLogger
+# ./run testlogger

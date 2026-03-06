@@ -141,7 +141,7 @@ private:
                 }
 
                 // [优化] 如果是超时唤醒，且完全没有新数据，直接下一轮，省去 Swap 开销
-                if(buffers_to_write_.empty() and current_buffer_->length() == 0)
+                if(buffers_to_write_.empty() and current_buffer_->count() == 0)
                 {
                     continue;
                 }

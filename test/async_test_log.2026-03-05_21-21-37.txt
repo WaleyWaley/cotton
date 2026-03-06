@@ -1,0 +1,1 @@
+2026-03-05 21:21:37 [0ms] 1720348269	Worker-2	0	[INFO]	[AsyncLogger]	[testAsyncLogger.cpp:45]	[AsyncLogger]	AsyncLogger

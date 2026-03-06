@@ -6,6 +6,7 @@
 class LogFormatter;
 class LogEvent;
 
+// 这个文件定义了一个模板类 AppenderProxy，它是一个线程安全的日志输出器代理，封装了具体的日志输出实现（如StdoutAppender或RollingFileAppender）。AppenderProxy 继承自 AppenderFacade，提供了一个统一的接口来输出日志事件，同时允许用户设置日志格式化器。通过使用模板参数 Impl，AppenderProxy 可以适配不同的日志输出实现，只要它们满足 IsAppenderImpl 的概念要求，即具有 log(formatter, event) 方法。
 template<typename T>
 concept IsAppenderImpl = requires(T x, LogFormatter y, LogEvent z) {
     x.log(y, z);
