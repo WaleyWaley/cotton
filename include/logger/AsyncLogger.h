@@ -128,7 +128,7 @@ private:
         buffers_to_process.reserve(16); // 存放16个缓冲区
 
         // 员工死循环开始循环写日志
-        while(running_)
+        while(running_ or !buffers_to_write_.empty() or current_buffer_ ->count() > 0)
         {
             {  
                 // 等待条件变量唤醒或者超时

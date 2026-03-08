@@ -15,7 +15,7 @@ public:
     // 尝试将 LogEvent 写入缓冲区
     auto append(LogEvent event) -> bool
     {
-        if(count_ < c_k_event_count)
+        if(count_ < N)
         {
             data_[count_] = std::move(event);    // 复制 LogEvent 对象
             count_++;

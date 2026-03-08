@@ -14,7 +14,7 @@ int main() {
 
     // 1. 创建异步 Logger (假设你的构造函数接收刷新间隔，比如 1 秒)
     // 如果你的 AsyncLogger 不需要传参，改成 make_shared<AsyncLogger>() 即可
-    auto async_logger = std::make_shared<AsyncLogger>(); 
+    auto async_logger = std::make_shared<AsyncLogger>(5); 
 
     // 2. 添加输出端：RollingFileAppender (限制每个文件大小为 1_kb，方便测试滚动分片)
     async_logger->addAppender(std::make_shared<AppenderProxy<RollingFileAppender>>(
