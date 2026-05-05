@@ -1,0 +1,20 @@
+{
+  "logger_name": "json_async",
+  "level": "INFO",
+  "event_count": 128,
+  "flush_interval": 2,
+  "max_pending_buffers": 32,
+  "appenders": [
+    {
+      "type": "stdout",
+      "pattern": "%d{%Y-%m-%d %H:%M:%S} [%p] [%c] %m%n"
+    },
+    {
+      "type": "rolling_file",
+      "file": "json_async.log",
+      "max_file_size": 1048576,
+      "roll_interval_seconds": 3600,
+      "pattern": "%d{%Y-%m-%d %H:%M:%S} [%p] [%c] %f:%l %m%n"
+    }
+  ]
+}

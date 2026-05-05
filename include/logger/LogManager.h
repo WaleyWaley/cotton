@@ -1,33 +1,40 @@
+#pragma once
+
 #include "common/alias.h"
 #include "common/singleton.hpp"
-#include "common/util.hpp"
+#include "logger/LoggerConfig.h"
 
-#include <functional>
+#include <memory>
 #include <mutex>
+#include <string>
 #include <string_view>
 #include <unordered_map>
 
 #define GET_ROOT_LOGGER() LoggerMgr::GetInstance().getRoot()
-
 #define GET_LOGGER_BY_NAME(name) LoggerMgr::GetInstance().getLogger(name)
+
+class Logger;
+class AsyncLogger;
+class LoggerManager;
 
 using LoggerMgr = Cot::Singleton<LoggerManager>;
 
-class Logger;
-
-class LoggerManager{
+class LoggerManager {
 public:
     LoggerManager();
     void init_();
-    
+
     auto getLogger(std::string_view logger_name) -> Sptr<Logger>;
-    auto getRoot() -> Sptr<Logger> {return root_;}
+    auto getRoot() -> Sptr<Logger> { return root_; }
+
+    // 对外API：根据配置创建/获取异步日志器
+    auto getOrCreateAsyncLogger(const LoggerConfig& config) -> Sptr<AsyncLogger>;
+    // 对外API：从 JSON 配置文件创建/获取异步日志器
+    auto getOrCreateAsyncLoggerFromFile(const std::string& config_file) -> Sptr<AsyncLogger>;
 
 private:
     mutable std::mutex mtx_;
     Sptr<Logger> root_;
-    // std::unordered_map< std::string, Sptr<Logger>, UtilT::Hasher, std::equal_to<> > loggers_;
     std::unordered_map<std::string, Sptr<Logger>> loggers_;
+    std::unordered_map<std::string, Sptr<AsyncLogger>> async_loggers_;
 };
-
-

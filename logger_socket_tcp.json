@@ -1,0 +1,22 @@
+{
+  "logger_name": "socket_tcp_logger",
+  "level": "INFO",
+  "event_count": 128,
+  "flush_interval": 2,
+  "max_pending_buffers": 32,
+  "appenders": [
+    {
+      "type": "stdout",
+      "pattern": "%d{%Y-%m-%d %H:%M:%S} [%p] [%c] %m%n"
+    },
+    {
+      "type": "socket",
+      "host": "127.0.0.1",
+      "port": 9001,
+      "protocol": "tcp",
+      "max_queue": 4096,
+      "reconnect_interval_ms": 3000,
+      "pattern": "%d{%Y-%m-%d %H:%M:%S} [%p] [%c] %f:%l %m%n"
+    }
+  ]
+}

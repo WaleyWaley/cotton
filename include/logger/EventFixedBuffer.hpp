@@ -1,43 +1,41 @@
 #pragma once
-#include <array>
 #include <span>
+#include <vector>
+
 #include "LogEvent.h"
 
-// 定义缓冲区大小：储存 64 个 LogEvent。
+// 默认缓冲区容量（事件条数）
 constexpr size_t c_k_event_count = 64;
 
-template <size_t N = c_k_event_count>
 class EventFixedBuffer
 {
 public:
-    using EventArray = std::array<LogEvent, N>;
-    // 记录缓冲区里面放了几个LogEvent
-    EventFixedBuffer():count_(0){}
-    // 尝试将 LogEvent 写入缓冲区
+    explicit EventFixedBuffer(size_t capacity = c_k_event_count)
+        : data_(capacity), count_(0) {}
+
     auto append(LogEvent event) -> bool
     {
-        if(count_ < c_k_event_count)
+        if (count_ < data_.size())
         {
-            data_[count_] = std::move(event);    // 将 LogEvent 移动至数组，避免字符串深拷贝
-            count_++;
+            data_[count_] = std::move(event);
+            ++count_;
             return true;
         }
-        return false; // 缓冲区已满
+        return false;
     }
 
-    // 已写入的事件数量
-    [[nodiscard]] size_t count() const {return count_;}
+    [[nodiscard]] auto count() const -> size_t { return count_; }
+    [[nodiscard]] auto capacity() const -> size_t { return data_.size(); }
+    [[nodiscard]] auto available() const -> size_t { return data_.size() - count_; }
 
-    // 剩余可用空间（事件数）
-    [[nodiscard]] auto available() const -> size_t {return N - count_;}
+    [[nodiscard]] auto getEventSpan() const -> std::span<const LogEvent>
+    {
+        return std::span<const LogEvent>(data_.data(), count_);
+    }
 
-    // 获取连续内存的“透明视窗”，原生支持ranges的for_each
-    [[nodiscard]] std::span<const LogEvent> getEventSpan() const {return std::span<const LogEvent>(data_.data(), count_);}
-    
-    // 清空缓冲区
-    void reset() {count_ = 0;}
-    
+    void reset() { count_ = 0; }
+
 private:
-    EventArray data_;
-    size_t count_ = 0;  // 当前存储的事件数量，代替了原来的字节偏移
+    std::vector<LogEvent> data_;
+    size_t count_;
 };

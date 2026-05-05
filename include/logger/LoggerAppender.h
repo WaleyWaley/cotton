@@ -177,7 +177,7 @@ private:
     Protocol                protocol_;
     size_t                  max_queue_;
     uint32_t                reconnect_interval_ms_;
-    // socket fd
+    
     int sock_fd{-1};
 
     // 解析好的目标地址(UDP 复用)

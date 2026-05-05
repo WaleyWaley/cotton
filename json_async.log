@@ -1,0 +1,22 @@
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=0
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=1
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=2
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=3
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=4
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=5
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=6
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=7
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=8
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=9
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=10
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=11
+2026-05-05 15:51:42 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=12
+2026-05-05 15:51:43 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=13
+2026-05-05 15:51:43 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=14
+2026-05-05 15:51:43 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=15
+2026-05-05 15:51:43 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=16
+2026-05-05 15:51:43 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=17
+2026-05-05 15:51:43 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=18
+2026-05-05 15:51:43 [INFO] [json_async] src/json_config_demo.cpp:14 json demo message index=19
+2026-05-05 15:51:43 [WARN] [json_async] src/json_config_demo.cpp:18 this is a warning from json demo
+2026-05-05 15:51:43 [ERROR] [json_async] src/json_config_demo.cpp:19 this is an error from json demo

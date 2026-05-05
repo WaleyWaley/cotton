@@ -27,7 +27,7 @@ auto LevelToString(LogLevel level) -> std::string_view
     }
 }
 
-auto StringToLevel(std::string_view str) -> LogLevel
+auto StringToLogLevel(std::string_view str) -> LogLevel
 {
     switch (UtilT::cHashString(str))
     {

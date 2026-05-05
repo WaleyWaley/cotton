@@ -87,7 +87,7 @@ public:
         os << event.getFiberId();
         return static_cast<size_t>(os.tellp() - start);
     }
-// };
+};
 
 /** @brief 线程名称 format */
 class ThreadNameFormatItem{
