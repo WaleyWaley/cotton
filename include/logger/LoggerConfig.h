@@ -9,7 +9,7 @@
 
 struct LoggerConfig {
     struct AppenderConfig {
-        enum class Type { Stdout, RollingFile, Socket };
+        enum class Type { Stdout, RollingFile, Socket, Sql };
         enum class SocketProtocol { TCP, UDP };
 
         Type type = Type::Stdout;
@@ -26,6 +26,16 @@ struct LoggerConfig {
         SocketProtocol protocol = SocketProtocol::TCP;
         size_t max_queue = 4096;
         uint32_t reconnect_interval_ms = 3000;
+
+        // sql (MySQL CLI)
+        std::string sql_host = "127.0.0.1";
+        uint16_t sql_port = 3306;
+        std::string sql_user = "root";
+        std::string sql_password{};
+        std::string sql_database = "test";
+        std::string sql_table = "logs";
+        size_t sql_batch_size = 64;
+        uint32_t sql_flush_interval_ms = 1000;
     };
 
     size_t event_count = 64;

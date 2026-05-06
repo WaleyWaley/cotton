@@ -21,6 +21,7 @@ auto parseAppenderType(const std::string& s) -> LoggerConfig::AppenderConfig::Ty
     if (v == "stdout") return LoggerConfig::AppenderConfig::Type::Stdout;
     if (v == "rolling_file" || v == "rollingfile") return LoggerConfig::AppenderConfig::Type::RollingFile;
     if (v == "socket") return LoggerConfig::AppenderConfig::Type::Socket;
+    if (v == "sql" || v == "mysql") return LoggerConfig::AppenderConfig::Type::Sql;
     return LoggerConfig::AppenderConfig::Type::Stdout;
 }
 
@@ -56,6 +57,16 @@ auto normalizeConfig(LoggerConfig cfg) -> LoggerConfig {
             if (app.port == 0) app.port = 9000;
             if (app.max_queue == 0) app.max_queue = 4096;
             if (app.reconnect_interval_ms == 0) app.reconnect_interval_ms = 3000;
+        }
+
+        if (app.type == LoggerConfig::AppenderConfig::Type::Sql) {
+            if (app.sql_host.empty()) app.sql_host = "127.0.0.1";
+            if (app.sql_port == 0) app.sql_port = 3306;
+            if (app.sql_user.empty()) app.sql_user = "root";
+            if (app.sql_database.empty()) app.sql_database = "test";
+            if (app.sql_table.empty()) app.sql_table = "logs";
+            if (app.sql_batch_size == 0) app.sql_batch_size = 64;
+            if (app.sql_flush_interval_ms == 0) app.sql_flush_interval_ms = 1000;
         }
     }
 
@@ -129,6 +140,31 @@ auto LoggerConfig::loadFromJsonFile(const std::string& file_path) -> LoggerConfi
             }
             if (a.contains("reconnect_interval_ms") && a.at("reconnect_interval_ms").is_number_unsigned()) {
                 app.reconnect_interval_ms = a.at("reconnect_interval_ms").get<uint32_t>();
+            }
+
+            if (a.contains("sql_host") && a.at("sql_host").is_string()) {
+                app.sql_host = a.at("sql_host").get<std::string>();
+            }
+            if (a.contains("sql_port") && a.at("sql_port").is_number_unsigned()) {
+                app.sql_port = a.at("sql_port").get<uint16_t>();
+            }
+            if (a.contains("sql_user") && a.at("sql_user").is_string()) {
+                app.sql_user = a.at("sql_user").get<std::string>();
+            }
+            if (a.contains("sql_password") && a.at("sql_password").is_string()) {
+                app.sql_password = a.at("sql_password").get<std::string>();
+            }
+            if (a.contains("sql_database") && a.at("sql_database").is_string()) {
+                app.sql_database = a.at("sql_database").get<std::string>();
+            }
+            if (a.contains("sql_table") && a.at("sql_table").is_string()) {
+                app.sql_table = a.at("sql_table").get<std::string>();
+            }
+            if (a.contains("sql_batch_size") && a.at("sql_batch_size").is_number_unsigned()) {
+                app.sql_batch_size = a.at("sql_batch_size").get<size_t>();
+            }
+            if (a.contains("sql_flush_interval_ms") && a.at("sql_flush_interval_ms").is_number_unsigned()) {
+                app.sql_flush_interval_ms = a.at("sql_flush_interval_ms").get<uint32_t>();
             }
 
             cfg.appenders.push_back(std::move(app));

@@ -1,0 +1,25 @@
+{
+  "logger_name": "sql_logger",
+  "level": "INFO",
+  "event_count": 128,
+  "flush_interval": 2,
+  "max_pending_buffers": 32,
+  "appenders": [
+    {
+      "type": "stdout",
+      "pattern": "%d{%Y-%m-%d %H:%M:%S} [%p] [%c] %m%n"
+    },
+    {
+      "type": "sql",
+      "sql_host": "127.0.0.1",
+      "sql_port": 3306,
+      "sql_user": "log_writer",
+      "sql_password": "Jyf20011122",
+      "sql_database": "test",
+      "sql_table": "logs",
+      "sql_batch_size": 32,
+      "sql_flush_interval_ms": 800,
+      "pattern": "%d{%Y-%m-%d %H:%M:%S} [%p] [%c] %f:%l %m%n"
+    }
+  ]
+}

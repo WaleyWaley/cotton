@@ -7,8 +7,8 @@
 
 int main() {
     try {
-        // auto logger = LoggerMgr::GetInstance().getOrCreateAsyncLoggerFromFile("logger_config.json");
-        auto logger = LoggerMgr::GetInstance().getOrCreateAsyncLoggerFromFile("logger_socket_tcp.json");
+        // 使用 SQL 配置，将日志写入 MySQL（通过 mysql CLI）
+        auto logger = LoggerMgr::GetInstance().getOrCreateAsyncLoggerFromFile("logger_sql.json");
         logger->start();
 
         for (int i = 0; i < 20; ++i) {
