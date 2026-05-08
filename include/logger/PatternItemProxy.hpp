@@ -11,7 +11,6 @@ template <typename T>
 concept IsPatternImpl = requires(T x, std::ostream& os, const LogEvent& event) {
     { x.format(os, event) } -> std::same_as<size_t>;
 };
-
 template <IsPatternImpl PatternImpl>
 class PatternItemProxy : public PatternItemFacade {
 public:

@@ -214,6 +214,7 @@ SqlAppender::~SqlAppender()
 // log() - 仅入队，不阻塞调用方
 void SqlAppender::log(const LogFormatter& fmter, const LogEvent& event)
 {
+    bool should_notify = false;
     // 从event中提取结构化字段，构建 INSERT 语句
     auto sql = buildInsertSql_(
         table_name_,
@@ -229,10 +230,11 @@ void SqlAppender::log(const LogFormatter& fmter, const LogEvent& event)
     {
         std::unique_lock<std::mutex> lock{mutex_};
         pending_sqls_.emplace_back(std::move(sql));
+        should_notify = pending_sqls_.size() >= batch_size_;
     }
 
     // 达到batch_size_时主动唤醒后台线程提前提交
-    if(pending_sqls_.size() >= batch_size_)
+    if(should_notify)
         cv_.notify_one();
 }
 

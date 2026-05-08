@@ -7,10 +7,12 @@
 
 #if __has_include(<mysql/mysql.h>)
 #include <mysql/mysql.h>
+#define COTTON_HAS_MYSQL_CLIENT 1
 #elif __has_include(<mariadb/mysql.h>)
 #include <mariadb/mysql.h>
+#define COTTON_HAS_MYSQL_CLIENT 1
 #else
-#error "MySQL client headers not found. Install default-libmysqlclient-dev or libmariadb-dev."
+#define COTTON_HAS_MYSQL_CLIENT 0
 #endif
 
 #include "logger/AppenderProxy.hpp"
@@ -28,6 +30,7 @@ auto toSocketProtocol(LoggerConfig::AppenderConfig::SocketProtocol p) -> SocketA
     return SocketAppender::Protocol::TCP;
 }
 
+#if COTTON_HAS_MYSQL_CLIENT
 class MysqlExecutorState {
 public:
     explicit MysqlExecutorState(const LoggerConfig::AppenderConfig& cfg)
@@ -123,6 +126,13 @@ auto buildMysqlExecutor(const LoggerConfig::AppenderConfig& cfg) -> SqlAppender:
     auto state = std::make_shared<MysqlExecutorState>(cfg);
     return [state](const std::string& sql) { state->execute(sql); };
 }
+#else
+auto buildMysqlExecutor(const LoggerConfig::AppenderConfig&) -> SqlAppender::SqlExecutor {
+    return [](const std::string&) {
+        throw std::runtime_error{"MySQL client headers not found. Install default-libmysqlclient-dev or libmariadb-dev."};
+    };
+}
+#endif
 
 
 auto buildAppender(const LoggerConfig::AppenderConfig& cfg) -> Sptr<AppenderFacade> {
@@ -170,6 +180,7 @@ LoggerManager::LoggerManager()
 
 void LoggerManager::init_() {}
 
+// MCP函数
 auto LoggerManager::getLogger(std::string_view logger_name) -> Sptr<Logger> {
     auto _ = std::lock_guard<std::mutex>{mtx_};
 
@@ -180,6 +191,31 @@ auto LoggerManager::getLogger(std::string_view logger_name) -> Sptr<Logger> {
     auto logger = std::make_shared<Logger>(std::string{logger_name});
     loggers_.emplace(std::string{logger_name}, logger);
     return logger;
+}
+
+auto LoggerManager::findLogger(std::string_view logger_name) const -> Sptr<Logger> {
+    auto _ = std::lock_guard<std::mutex>{mtx_};
+    if (auto it = loggers_.find(std::string{logger_name}); it != loggers_.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
+
+auto LoggerManager::findAsyncLogger(std::string_view logger_name) const -> Sptr<AsyncLogger> {
+    auto _ = std::lock_guard<std::mutex>{mtx_};
+    if (auto it = async_loggers_.find(std::string{logger_name}); it != async_loggers_.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
+// MCP函数结束
+
+auto LoggerManager::configureAsyncLogger_(const Sptr<AsyncLogger>& logger, const LoggerConfig& config) -> void {
+    logger->setLogLevel(config.level);
+    logger->clearAppender();
+    for (const auto& app_cfg : config.appenders) {
+        logger->addAppender(buildAppender(app_cfg));
+    }
 }
 
 auto LoggerManager::getOrCreateAsyncLogger(const LoggerConfig& config) -> Sptr<AsyncLogger> {
@@ -194,10 +230,7 @@ auto LoggerManager::getOrCreateAsyncLogger(const LoggerConfig& config) -> Sptr<A
     cfg.logger_name = key;
     auto logger = std::make_shared<AsyncLogger>(cfg);
 
-    logger->clearAppender();
-    for (const auto& app_cfg : cfg.appenders) {
-        logger->addAppender(buildAppender(app_cfg));
-    }
+    configureAsyncLogger_(logger, cfg);
 
     async_loggers_.emplace(key, logger);
     loggers_[key] = logger;
@@ -208,3 +241,24 @@ auto LoggerManager::getOrCreateAsyncLoggerFromFile(const std::string& config_fil
     auto cfg = LoggerConfig::loadFromJsonFile(config_file);
     return getOrCreateAsyncLogger(cfg);
 }
+
+auto LoggerManager::reloadAsyncLoggerFromFile(const std::string& config_file) -> Sptr<AsyncLogger> {
+    auto cfg = LoggerConfig::loadFromJsonFile(config_file);
+    auto _ = std::lock_guard<std::mutex>{mtx_};
+
+    const auto key = cfg.logger_name.empty() ? std::string{"root"} : cfg.logger_name;
+    cfg.logger_name = key;
+
+    if (auto it = async_loggers_.find(key); it != async_loggers_.end()) {
+        configureAsyncLogger_(it->second, cfg);
+        loggers_[key] = it->second;
+        return it->second;
+    }
+
+    auto logger = std::make_shared<AsyncLogger>(cfg);
+    configureAsyncLogger_(logger, cfg);
+    async_loggers_[key] = logger;
+    loggers_[key] = logger;
+    return logger;
+}
+

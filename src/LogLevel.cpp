@@ -57,7 +57,7 @@ auto StringToLogLevel(std::string_view str) -> LogLevel
         XX(all, LogLevel::ALL)
 #undef XX
     default:
-        return LogLevel::ALL;
+        return LogLevel::UNKNOW;
     }
 }
 

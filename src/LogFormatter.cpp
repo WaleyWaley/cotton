@@ -17,6 +17,7 @@ enum class ParseState{
 
 }   //namespace
 
+// 提供了一个能执行format(std::ostream &os, LogEvent& event) -> size_t 的这样函数的接口
 class PatternItemFacade;
 
 // 1. 无参工厂：生产不需要参数的 Item (如 %m 消息, %n 换行)
