@@ -81,6 +81,7 @@ public:
 class SqlAppender{
 public:
     using SqlExecutor = std::function<void(const std::string& /*sql*/)>;
+
     explicit SqlAppender(std::string    table_name,
                          SqlExecutor    executor,
                          size_t         batch_size   = 64,

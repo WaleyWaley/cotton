@@ -159,13 +159,9 @@ void LogFormatter::startParse_()
 
 auto LogFormatter::format(std::ostream& os, const LogEvent& event) const -> size_t {
     size_t total_size = 0;
+    // std::ranges::for_each(容器，对容器的操作)
     std::ranges::for_each(pattern_items_,[&os, &event, &total_size](const Sptr<PatternItemFacade> item) -> void 
-    // item->format(...) 是多态调用！
-    // 不同的 item 会把自己负责的内容写到 os 里，并返回写入的长度。
     {
-        // 如果 item 是日期项，它就往 os 写入 "2023-10-27"。
-        // 如果 item 是消息项，它就往 os 写入 "User login success"。
-        // 这就体现了 多态 的威力：不管你是什么项，我统一调 format 接口。
         total_size += item->format(os, event);
     });
     return total_size;

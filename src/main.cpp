@@ -27,17 +27,17 @@ int main() {
     return 0;
 }
 
-g++ -std=c++20 \
-  -I. \
-  -Iinclude \
-  src/main.cpp \
-  src/LoggerMcpTools.cpp \
-  src/LogManager.cpp \
-  src/Logger.cpp \
-  src/LoggerConfig.cpp \
-  src/LoggerAppender.cpp \
-  src/LogFormatter.cpp \
-  src/LogEvent.cpp \
-  src/LogLevel.cpp \
-  src/PatternItemImpl.cpp \
-  -o cotton_demo
+// g++ -std=c++20 \
+//   -I. \
+//   -Iinclude \
+//   src/main.cpp \
+//   src/LoggerMcpTools.cpp \
+//   src/LogManager.cpp \
+//   src/Logger.cpp \
+//   src/LoggerConfig.cpp \
+//   src/LoggerAppender.cpp \
+//   src/LogFormatter.cpp \
+//   src/LogEvent.cpp \
+//   src/LogLevel.cpp \
+//   src/PatternItemImpl.cpp \
+//   -o cotton_demo

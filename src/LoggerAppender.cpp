@@ -28,8 +28,8 @@ void StdoutAppender::log(const LogFormatter& fmter, const LogEvent& event){
 /*===========================RollingFileAppenderAppender==================*/
 
 RollingFileAppender::RollingFileAppender(std::string filename,
-                                         size_t max_bytes,
-                                         Seconds roll_interval)         
+                                         size_t max_bytes,          // 文件极限大小
+                                         Seconds roll_interval)     // 滚动的事件间隔    
     : filename_{std::move(filename)}
     , basename_{std::filesystem::path{filename_}.filename().string()}
     , max_bytes_{max_bytes}
@@ -151,7 +151,7 @@ auto RollingFileAppender::log(const LogFormatter& fmter, const LogEvent& event) 
         rollFile_();
     }
     // 3.格式化并写入日志,
-    auto total_size = fmter.format(filestream_, event);
+    auto total_size = fmter.format(filestream_, event); // 返回写了多少字节
 
     // 4.更新写入偏移量
     offset_ += total_size;
@@ -163,10 +163,10 @@ auto RollingFileAppender::log(const LogFormatter& fmter, const LogEvent& event) 
     auto now = Clock::now();
 
     // 检查时间间隔
-    auto time_to_flush = (now - last_flush_time_) >= c_flush_seconds;
+    auto time_to_flush = ((now - last_flush_time_) >= c_flush_seconds);
 
     // 检查写入次数
-    bool count_to_flush = flush_count_ >= c_flush_max_appends;
+    bool count_to_flush = (flush_count_ >= c_flush_max_appends);
 
     if(time_to_flush || count_to_flush)
     {
@@ -336,7 +336,6 @@ auto SqlAppender::buildInsertSql_(const std::string& table,
 
 
 
-
 // SocketAppender 实现
 SocketAppender::SocketAppender(std::string host,
                                uint16_t port,
@@ -350,11 +349,14 @@ SocketAppender::SocketAppender(std::string host,
     , reconnect_interval_ms_{reconnect_interval_ms}
 {
     // 解析目标地址(host 可为域名或 IP)
-    std::memset(&remote_addr_, 0, sizeof(remote_addr_));
-    remote_addr_.sin_family = AF_INET;
-    remote_addr_.sin_port   = htons(port_);
+    std::memset(&remote_addr_, 0, sizeof(remote_addr_));    //防止脏数据
+    remote_addr_.sin_family = AF_INET;      // IPv4协议
+    // htons把主机字节序转网络字节序
+    remote_addr_.sin_port   = htons(port_); // 端口
 
+    // 解析client IP
     // 先尝试 inet_pton(纯IP字符串)
+    // 输入点分十进制，解析后写入 remote_addr_.sin_addr
     if(::inet_pton(AF_INET, host.c_str(), &remote_addr_.sin_addr) != 1)
     {
         // 非纯 IP， 尝试 DNS 解析
@@ -362,16 +364,20 @@ SocketAppender::SocketAppender(std::string host,
         hints.ai_family = AF_INET;
         hints.ai_socktype = (protocol_ == Protocol::TCP) ? SOCK_STREAM : SOCK_DGRAM;
 
+        // 存储DNS解析结果（链表）
         struct addrinfo* res = nullptr;
 
         if(::getaddrinfo(host_.c_str(), nullptr, &hints, &res) == 0 and res)
         {
+            // 把解析结果转为IPv4地址结构体
             auto* addr4 = reinterpret_cast<struct sockaddr_in*>(res->ai_addr);
             remote_addr_.sin_addr = addr4->sin_addr;
-            ::freeaddrinfo(res);
+            ::freeaddrinfo(res);    // 释放DNS解析的内存，避免内存泄漏
         }
         else
         {
+            // 都解析失败
+            // int fprintf(FILE* 流指针, 格式化字符串, 参数1, 参数2...);
             std::fprintf(stderr, "{SocketAppender} Failed to resolve host: %s\n", host_.c_str());
         }
     }
@@ -406,26 +412,33 @@ SocketAppender::~SocketAppender()
     }
 }
 
+// 前台写入消息队列
 void SocketAppender::log(const LogFormatter& fmter, const LogEvent& event)
 {
+    if(max_queue_ == 0)
+        return;
+    // 调用format的单参数重载把事件转化为字符串
     std::string msg = fmter.format(event);
+    {
+        auto lock = std::unique_lock{mutex_};
 
-    auto lock = std::unique_lock{mutex_};
+        // 队列满时丢弃最旧的消息，保证调用方不阻塞, 严苛的防御性约束：不管队列现在多肿，强制瘦身到 max_queue_ 以下
+        while(msg_queue_.size() >= max_queue_)
+            msg_queue_.pop();
 
-    // 队列满时丢弃最旧的消息，保证调用方不阻塞, 严苛的防御性约束：不管队列现在多肿，强制瘦身到 max_queue_ 以下
-    while(msg_queue_.size() >= max_queue_)
-        msg_queue_.pop();
-
-    msg_queue_.push(std::move(msg));
+        msg_queue_.push(std::move(msg));
+    } // 锁结束
+    // 只是负责唤醒后台线程。后台线程醒来后，马上要重新拿 mutex_。如果你还没释放锁就通知它，它醒来也只能继续等锁。
     cv_.notify_one();
 }
 
-// 后台工作线程
+// 后台工作线程来sendTcp_或者sendUdp_
 void SocketAppender::workerLoop_()
 {
     while(true)
     {
         std::string msg;
+
         {
             auto lock = std::unique_lock{mutex_};
             cv_.wait(lock,[this]{return !msg_queue_.empty() || stop_.load(std::memory_order_acquire);});
@@ -436,10 +449,11 @@ void SocketAppender::workerLoop_()
             }
             msg = std::move(msg_queue_.front());
             msg_queue_.pop();
-        }
+        }   // 锁结束
 
         // 在锁外执行网络 I/O
         bool ok = false;
+
         if(protocol_ == Protocol::TCP)
             ok = sendTcp_(msg);
         else

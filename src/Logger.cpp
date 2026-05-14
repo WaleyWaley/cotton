@@ -28,8 +28,17 @@ void Logger::log(const LogEvent& event) const {
         return;
     }
 
+    // 让 logger 检查这条 event 的级别； 如果允许输出，就把 event 分发给 logger 挂载的所有输出端。
+    /*
+        这里的 appender 就是输出端，比如：
+        控制台 StdoutAppender
+        滚动文件 RollingFileAppender
+        网络 SocketAppender
+        数据库 SqlAppender
+    */
     for (const auto& appender : appenders_) {
         if (appender) {
+            // appender是AppenderFacade
             appender->log(event);
         }
     }

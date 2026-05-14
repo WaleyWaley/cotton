@@ -32,6 +32,7 @@ public:
 
     auto SetFormatterPattern(LogFormatter formatter) -> void { formatter_ = std::move(formatter); }
 
+    // impl实现的日志输出，AppenderFacade的log是它的接口
     void log(const LogEvent& event) override { impl_.log(formatter_, event); }
 
     ~AppenderProxy() override = default;
