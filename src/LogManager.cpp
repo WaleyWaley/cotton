@@ -21,6 +21,17 @@
 #include "logger/LoggerAppender.h"
 #include "logger/LogManager.h"
 
+
+/**  @brief 管理 root logger。
+*    按名称获取或创建普通 logger。
+*    查找 logger。
+*    查找 async logger。
+*    根据 LoggerConfig 创建 async logger。
+*    从 JSON 文件加载 logger。
+*    运行时重载 async logger 配置。
+*    根据 appender config 构造具体 appender。
+*/
+
 namespace {
 
 auto toSocketProtocol(LoggerConfig::AppenderConfig::SocketProtocol p) -> SocketAppender::Protocol {
@@ -242,9 +253,11 @@ auto LoggerManager::getOrCreateAsyncLoggerFromFile(const std::string& config_fil
     return getOrCreateAsyncLogger(cfg);
 }
 
+// 配置热重载
 auto LoggerManager::reloadAsyncLoggerFromFile(const std::string& config_file) -> Sptr<AsyncLogger> {
     auto cfg = LoggerConfig::loadFromJsonFile(config_file);
-    auto _ = std::lock_guard<std::mutex>{mtx_};
+
+    std::lock_guard<std::mutex> lock(mtx_);
 
     const auto key = cfg.logger_name.empty() ? std::string{"root"} : cfg.logger_name;
     cfg.logger_name = key;

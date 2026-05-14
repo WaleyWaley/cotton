@@ -31,6 +31,10 @@ auto parseSocketProtocol(const std::string& s) -> LoggerConfig::AppenderConfig::
     return LoggerConfig::AppenderConfig::SocketProtocol::TCP;
 }
 
+/** @brief 规范化日志配置，为未设置/非法的配置项赋予默认值，确保日志系统正常运行
+*   @param cfg 日志配置对象
+*   @return LoggerConfig 正规化后的日志配置对象
+*/
 auto normalizeConfig(LoggerConfig cfg) -> LoggerConfig {
     if (cfg.event_count == 0) cfg.event_count = 64;
     if (cfg.flush_interval <= 0) cfg.flush_interval = 3;
@@ -76,6 +80,7 @@ auto normalizeConfig(LoggerConfig cfg) -> LoggerConfig {
 } // namespace
 
 auto LoggerConfig::loadFromJsonFile(const std::string& file_path) -> LoggerConfig {
+    // 从文件file_path读进程序
     std::ifstream in(file_path);
     if (!in.is_open()) {
         throw std::runtime_error("cannot open logger config file: " + file_path);

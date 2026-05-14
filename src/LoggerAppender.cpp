@@ -201,12 +201,10 @@ SqlAppender::~SqlAppender()
 {
     // 1.通知后台线程退出
     {
-        std::unique_lock<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(mutex_);
         stop_.store(true, std::memory_order_release);
     }
-
     cv_.notify_one();
-
     if(worker_thread_.joinable())
         worker_thread_.join();
 }
@@ -215,6 +213,7 @@ SqlAppender::~SqlAppender()
 void SqlAppender::log(const LogFormatter& fmter, const LogEvent& event)
 {
     bool should_notify = false;
+
     // 从event中提取结构化字段，构建 INSERT 语句
     auto sql = buildInsertSql_(
         table_name_,
@@ -228,10 +227,10 @@ void SqlAppender::log(const LogFormatter& fmter, const LogEvent& event)
     );
 
     {
-        std::unique_lock<std::mutex> lock{mutex_};
+        std::lock_guard<std::mutex> lock{mutex_};
         pending_sqls_.emplace_back(std::move(sql));
         should_notify = pending_sqls_.size() >= batch_size_;
-    }
+    }   // 锁结束
 
     // 达到batch_size_时主动唤醒后台线程提前提交
     if(should_notify)
@@ -253,7 +252,7 @@ void SqlAppender::workerLoop_()
 
             // 将待处理 SQL swap 出来，尽快释放锁
             batch.swap(pending_sqls_);
-        }
+        }   //锁结束
 
         // 完全【无锁】状态下，从容落盘
         if(!batch.empty())
@@ -265,7 +264,7 @@ void SqlAppender::workerLoop_()
             std::vector<std::string> remaining;
             {
                 // 此时外面的锁早就释放了，这里重新加锁是绝对安全的
-                std::unique_lock<std::mutex> lock{mutex_};
+                std::lock_guard<std::mutex> lock{mutex_};
                 remaining.swap(pending_sqls_);
             } // 拿到最后的数据，立刻解锁
 

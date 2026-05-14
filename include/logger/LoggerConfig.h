@@ -8,7 +8,9 @@
 #include <vector>
 
 struct LoggerConfig {
-    struct AppenderConfig {
+
+    // 输出端配置
+    struct AppenderConfig { 
         enum class Type { Stdout, RollingFile, Socket, Sql };
         enum class SocketProtocol { TCP, UDP };
 
@@ -38,15 +40,15 @@ struct LoggerConfig {
         uint32_t sql_flush_interval_ms = 1000;
     };
 
-    size_t event_count = 64;
-    int flush_interval = 3;
-    size_t max_pending_buffers = 25;
+    size_t event_count = 64;    // 每个异步缓冲区最多放多少条事件
+    int flush_interval = 3;     // 后台线程定时flush间隔
+    size_t max_pending_buffers = 25;    // 最大待写缓冲区数量, 防止无限积压
 
     LogLevel level = LogLevel::INFO;
-    std::string logger_name = "root";
+    std::string logger_name = "root";           // logger名称，也可作为业务标识
 
     // 若未配置 appenders，则默认挂一个 stdout
-    std::vector<AppenderConfig> appenders{};
+    std::vector<AppenderConfig> appenders{};    // 输出端列表
 
     static auto loadFromJsonFile(const std::string& file_path) -> LoggerConfig;
 };

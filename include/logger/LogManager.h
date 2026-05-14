@@ -18,21 +18,37 @@ class Logger;
 class AsyncLogger;
 class LoggerManager;
 
+// Meyers Singleton
 using LoggerMgr = Cot::Singleton<LoggerManager>;
+
+
+/**  @brief 管理 root logger。
+*    按名称获取或创建普通 logger。
+*    查找 logger。
+*    查找 async logger。
+*    根据 LoggerConfig 创建 async logger。
+*    从 JSON 文件加载 logger。
+*    运行时重载 async logger 配置。
+*    根据 appender config 构造具体 appender。
+*/
 
 class LoggerManager {
 public:
     LoggerManager();
     void init_();
 
+    // getLogger 按名称查找，不存在就创建普通 Logger
     auto getLogger(std::string_view logger_name) -> Sptr<Logger>;
+
     auto findLogger(std::string_view logger_name) const -> Sptr<Logger>;
     auto findAsyncLogger(std::string_view logger_name) const -> Sptr<AsyncLogger>;
     auto getRoot() -> Sptr<Logger> { return root_; }
 
     // 对外API：根据配置创建/获取异步日志器
+    // 根据配置创建 AsyncLogger，然后调用 configureAsyncLogger_ 挂 appender
     auto getOrCreateAsyncLogger(const LoggerConfig& config) -> Sptr<AsyncLogger>;
     // 对外API：从 JSON 配置文件创建/获取异步日志器
+    // 重新读取 JSON，如果 logger 已存在，就清空旧 appender 并按新配置重新挂载。
     auto getOrCreateAsyncLoggerFromFile(const std::string& config_file) -> Sptr<AsyncLogger>;
     auto reloadAsyncLoggerFromFile(const std::string& config_file) -> Sptr<AsyncLogger>;
 
