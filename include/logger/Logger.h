@@ -54,7 +54,7 @@ private:
     LogLevel level_;
 
     // Appender集合
-    std::vector<Sptr<AppenderFacade>> appenders_;       // 这里运用了类型擦除,vector里面存的是一个“皮”
+    std::vector<Sptr<AppenderFacade>> appenders_;       // 这里运用了类型擦除,vector里面存的是一个“皮”,
     
     // 自动日志器ID, inline static 可以在类内初始化
     inline static std::atomic<uint32_t> auto_logger_id_ = 0;

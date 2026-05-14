@@ -97,6 +97,19 @@ auto getSizeArg(const json& args, const std::string& key, size_t default_value) 
     return args.at(key).get<size_t>();
 }
 
+// 具体格式示例
+/*{
+  "name": "calculate_sum",
+  "description": "Add two numbers together",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "a": { "type": "number", "description": "First number" },
+      "b": { "type": "number", "description": "Second number" }
+    },
+    "required": ["a", "b"]
+  }
+} */
 auto toolSchema(
     std::string name,
     std::string description,
